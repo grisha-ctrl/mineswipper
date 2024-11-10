@@ -2,11 +2,13 @@ const API_URL = 'http://localhost:8080/api';
 let gameId;
 let rows, cols;
 let board = [];
+let gameOver = false;
 
 async function initGame() {
     const modal = document.getElementById('gameOverModal');
     modal.style.display = 'none';
     board = [];
+    gameOver = false;
     const response = await fetch(`${API_URL}/game`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -21,15 +23,19 @@ async function initGame() {
 }
 
 async function revealCell(row, col) {
+    if (gameOver) {
+        return;
+    }
     const response = await fetch(`${API_URL}/game/${gameId}/reveal?row=${row}&col=${col}`, {
         method: 'POST',
     });
     const data = await response.json();
-    updateBoard(data.board);
-
     if (data.gameOver) {
+        gameOver = true;
         showGameOverModal();
     }
+
+    updateBoard(data.board, row, col);
 }
 
 function createBoard() {
@@ -60,6 +66,9 @@ function createBoard() {
 }
 
 async function toggleFlag(row, col) {
+    if (gameOver) {
+        return;
+    }
     const response = await fetch(`${API_URL}/game/${gameId}/toggle-flag?row=${row}&col=${col}`, {
         method: 'POST',
     });
@@ -74,17 +83,22 @@ async function toggleFlag(row, col) {
     }
 }
 
-function updateBoard(boardData) {
+function updateBoard(boardData, row, col) {
     for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
             const cellData = boardData[r][c];
             const cell = board[r][c].element;
 
-            if (cellData.revealed) {
+            if (gameOver && cellData.mine && !cellData.flagged) {
+                if (row === r && col === c) {
+                    cell.textContent = '💥';
+                } else {
+                    cell.textContent = '💣';
+                }
+
+            } else if (cellData.revealed) {
                 cell.classList.add('revealed');
-                if (cellData.mine) {
-                    cell.classList.add('mine');
-                } else if (cellData.adjacentMines > 0) {
+                if (cellData.adjacentMines > 0) {
                     cell.textContent = cellData.adjacentMines;
                 }
             } else if (cellData.flagged) {
@@ -106,6 +120,11 @@ function updateFlagCount(count) {
 function showGameOverModal() {
     const modal = document.getElementById('gameOverModal');
     modal.style.display = 'flex';
+}
+
+function closeModal() {
+    const modal = document.getElementById('gameOverModal');
+    modal.style.display = 'none';
 }
 
 window.onload = initGame;
