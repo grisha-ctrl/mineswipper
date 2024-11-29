@@ -37,4 +37,5 @@ public class Cell {
     public void setAdjacentMines(int adjacentMines) {
         this.adjacentMines = adjacentMines;
     }
+
 }

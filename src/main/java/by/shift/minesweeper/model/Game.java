@@ -1,5 +1,6 @@
 package by.shift.minesweeper.model;
 
+
 public class Game {
     private final String id;
     private final int rows;
@@ -7,7 +8,7 @@ public class Game {
     private final int minesCount;
     private int flagCount;
     private int flaggedMines;
-    private final Cell[][] board;
+    private Cell[][] board;
     private boolean gameOver;
 
     public Game(String id, int rows, int cols, int minesCount) {
@@ -19,6 +20,8 @@ public class Game {
         this.gameOver = false;
         this.flaggedMines = 0;
         this.flagCount = minesCount;
+
+        initializeBoard();
     }
 
     public boolean isGameOver() {
@@ -29,6 +32,10 @@ public class Game {
         return board;
     }
 
+    public void setBoard(Cell[][] mockBoard) {
+        this.board = mockBoard;
+    }
+
     public Cell getCell(int row, int col) {
         return board[row][col];
     }
@@ -37,14 +44,9 @@ public class Game {
         board[row][col] = cell;
     }
 
-    public String getId() {
-        return id;
-    }
-
     public int getFlaggedMines() {
         return flaggedMines;
     }
-
 
     public void setFlaggedMines(int flaggedMines) {
         this.flaggedMines = flaggedMines;
@@ -73,4 +75,14 @@ public class Game {
     public int getCols() {
         return cols;
     }
+
+    private void initializeBoard() {
+        for (int i = 0; i < getRows(); i++) {
+            for (int j = 0; j < getCols(); j++) {
+                setCell(i, j, new Cell());
+            }
+        }
+    }
 }
+
+
